@@ -1,0 +1,7 @@
+Zuerst müssen sie eine datenbankerstellen, danach können sie table auf dem gui drüchen die gewünschte datenbank auswählen namen der tabelle und dann sachen einfügen in diesem sinn:
+
+id integer,
+name text,
+telefon integer
+
+fertig es ist in die Datenbank eingetragen.
