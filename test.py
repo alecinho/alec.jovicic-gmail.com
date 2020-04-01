@@ -4,71 +4,59 @@ import tkinter as tk
 from glob import glob
  
  
- 
 class App:
-    # window
+ 
     def __init__(self, root):
- 
-        self.fields = []
         self.root = root
-        self.label()
-        self.entry()
-        self.button()
+        self.root.geometry("200x200")
+        self.root['bg'] = "cyan"
+        tk.Button(
+            self.root, text="Create a database",
+            command=lambda: self.new_window(Win1)).pack()
+        tk.Button(
+            self.root, text="Create a table",
+            command=lambda: self.new_window(Win2)).pack()
+ 
+    def new_window(self, _class):
+        self.new = tk.Toplevel(self.root)
+        _class(self.new)
+ 
+ 
+class Win:
+    fields = []
+ 
+    def listbox(self):
+        self.lab_lb = tk.Label(self.root, text="Database in the folder")
+        self.lab_lb['bg'] = 'gold'
+        self.lab_lb.pack()
+        self.lb = tk.Listbox(self.root)
+        self.lb.pack()
+        for file in glob("*.db"):
+            self.lb.insert(tk.END, file)
+        self.lb.bind("<Double-Button>", lambda x: self.show_selection())
+ 
+    def show_selection(self):
+        print("This function here does not works")
+ 
+ 
+class Win1(Win):
+    def __init__(self, root):
+        self.root = root
+        self.root.geometry("400x300")
+        self.root.title("Create Database")
+        self.widgets_db()
         self.listbox()
-        self.db_name_widgets()
-        self.tb_name_widgets()
-        self.fields_widgets()
-        self.btn_create_table()
  
-    def label(self):
-        self.l = tk.Label(self.root, text="Create a db [insert the name]")
-        self.l.pack()
- 
-    def entry(self):
+    def widgets_db(self):
+        self.label = tk.Label(
+            self.root, text="Create a db [insert the name]")
+        self.label.pack()
         self.db = tk.StringVar()
         self.e = tk.Entry(self.root, textvariable=self.db)
         self.e.pack()
- 
-    def button(self):
-        self.b = tk.Button(self.root, text="Create DB", command= lambda: self.mk_db())
+        self.b = tk.Button(
+            self.root, text="Create DB", command=lambda: self.mk_db())
         self.b.pack()
- 
-    def listbox(self):
-        self.lb = tk.Listbox(self.root)
-        self.lb.pack()
-        self.show_db()
- 
-    def db_name_widgets(self):
-        # label and Entry for Database name
-        self.ldbname = tk.Label(self.root, text="Insert Database name")
-        self.ldbname.pack()
-        self.dbn = tk.StringVar()
-        self.edb = tk.Entry(self.root, textvariable = self.dbn)
-        self.edb.pack()
- 
-    def tb_name_widgets(self):
-        self.ltbname = tk.Label(self.root, text="Insert Table name")
-        self.ltbname.pack()
-        self.tbn = tk.StringVar()
-        self.etb = tk.Entry(self.root, textvariable = self.tbn)
-        self.etb.pack()
- 
-    def fields_widgets(self):
-        self.lflname = tk.Label(self.root, text="Insert Fields name and type\n followeb by a comma, one by one,\nclicking once for each field.")
-        self.lflname.pack()
-        self.vfl = tk.StringVar()
-        self.efl = tk.Entry(self.root, textvariable = self.vfl)
-        self.efl.pack()
-        self.bfl = tk.Button(self.root, text="Create Field", command= lambda: self.mk_fl())
-        self.bfl.pack()
- 
-    def btn_create_table(self):
-        self.btb = tk.Button(self.root, text="Create Table", command= lambda: self.mk_tb(self.dbn, self.tbn))
-        self.btb.pack()
- 
-    def show_db(self):
-        for file in glob("*.db"):
-            self.lb.insert(tk.END, file)
  
     def mk_db(self):
         db = self.e.get()
@@ -89,21 +77,73 @@ class App:
             self.db.set("")
             conn.close()
  
-    def mk_tb(self, dbn, tbn):
-        self.conn = lite.connect(dbn.get())
+ 
+class Win2(Win):
+    def __init__(self, root):
+        self.root = root
+        self.root.geometry("400x500")
+        self.root.title("Create Tables")
+        self.listbox()
+        self.widgets_tb()
+        self.widgets_fl()
+ 
+    def widgets_tb(self):
+        """Widgets to create tables"""
+        self.frame1 = tk.Frame(self.root)
+        self.frame1.pack()
+        self.lbdbn = tk.Label(
+            self.frame1, text="Choose a Database")
+        self.lbdbn.pack(side="left")
+        # entry + StringVar
+        self.string_dbn = tk.StringVar()
+        # to get the value in the entry => a = self.string_tbn.get()
+        # or a = self.entry_tbn.get()
+        # if we want to clear the text into the entry => self.string_tbn("")
+        self.entry_dbn = tk.Entry(
+            self.frame1, textvariable=self.string_dbn)
+        self.entry_dbn.pack(side="left")
+ 
+        # ========== insert table data ===================
+        # name of table
+        self.frame2 = tk.Frame(self.root)
+        self.frame2.pack()
+        self.lbtbn = tk.Label(
+            self.frame2, text="Insert Table name")
+        self.lbtbn.pack(side="left")
+        self.string_tbn = tk.StringVar()
+        self.entry_tbn = tk.Entry(
+            self.frame2, textvariable=self.string_tbn)
+        self.entry_tbn.pack(side="left")
+ 
+    def widgets_fl(self):
+        """The widgets to insert fields"""
+        self.frame3 = tk.Frame(self.root)
+        self.frame3.pack()
+        self.lfl = tk.Label(
+            self.frame3, text="Insert the table fields")
+        self.lfl.pack()
+        self.lfl['bg'] = 'gold'
+        self.text = tk.Text(self.frame3, height=9)
+        self.text.pack()
+        self.btb = tk.Button(
+            self.root, text="Create The table", command=lambda: self.mk_tb())
+        self.btb.pack()
+ 
+    def show_selection(self):
+        x = self.lb.curselection()[0]
+        x = self.lb.get(x)
+        self.string_dbn.set(x)
+ 
+    def mk_tb(self):
+        self.conn = lite.connect(self.string_dbn.get())
         self.cur = self.conn.cursor()
-        self.fields = "".join(self.fields)
-        self.cur.execute("""create table {} (
-        {});""".format(tbn, self.fields))
-        self.fields = []
-        self.conn.close()
- 
-    def mk_fl(self):
-        self.fields.append(self.efl.get())
-        self.vfl.set("")
+        self.cur.execute(
+            """create table {}(
+            {});""".format(
+                self.string_tbn,
+                self.text.get("1.0", 'end-1c')))
  
  
- 
-root = tk.Tk()  
-win = App(root)
+root = tk.Tk()
+app = App(root)
 root.mainloop()
